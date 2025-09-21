@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Details - Ayurtrace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card { border-radius:8px; padding:12px; margin:10px 0; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+    .card:nth-child(odd) { background:#f0fdf4; }
+    .card:nth-child(even) { background:#e0f2fe; }
+    .hidden { display:none; }
+    .backBtn { margin-bottom:10px; display:inline-block; background:#34d399; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; }
+  </style>
+</head>
+<body class="bg-green-50 text-gray-800">
+
+<div class="max-w-4xl mx-auto p-6">
+
+  <a href="index.html" class="backBtn">🏠 Back to Home</a>
+
+  <header class="mb-6">
+    <h1 class="text-3xl font-bold text-green-700">🌿 Batch Details</h1>
+    <p class="text-gray-700 mt-1">Scan QR on the product to see its traceability journey.</p>
+  </header>
+
+  <div id="batchContent">
+    <!-- Batch details will be injected here -->
+  </div>
+
+</div>
+
+<script>
+function getBatchIdFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("batchId");
+}
+
+function renderSection(container, title, value) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const header = document.createElement("h3");
+  header.textContent = title;
+  header.className = "font-semibold mb-2 text-green-700";
+
+  const content = document.createElement("p");
+  content.textContent = value;
+
+  card.appendChild(header);
+  card.appendChild(content);
+  container.appendChild(card);
+}
+
+async function fetchBatchDetails() {
+  const batchId = getBatchIdFromURL();
+  const container = document.getElementById("batchContent");
+  container.innerHTML = "";
+
+  try {
+    const res = await fetch(`https://ai-herb-tracker.onrender.com/api/batch/${batchId}`);
+    if (!res.ok) throw new Error("Failed to fetch batch details");
+    const data = await res.json();
+
+    // Display batch data
+    renderSection(container, "Batch ID", data.batchId || "N/A");
+    renderSection(container, "Farm Name", data.farmName || "N/A");
+    renderSection(container, "Harvest Date", data.harvestDate || "N/A");
+    renderSection(container, "Processing Details", data.processing || "N/A");
+    renderSection(container, "Delivery Status", data.delivery || "N/A");
+
+  } catch (err) {
+    const error = document.createElement("p");
+    error.textContent = "⚠ Could not fetch batch details: " + err.message;
+    error.className = "text-red-600";
+    container.appendChild(error);
+  }
+}
+
+window.onload = fetchBatchDetails;
+</script>
+
+</body>
+</html>

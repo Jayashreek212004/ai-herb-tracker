@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    .card { border-radius:8px; padding:12px; margin:10px 0; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+    .hidden { display:none; }
+  </style>
 </head>
 <body class="bg-green-50 text-gray-800">
 
@@ -16,7 +20,7 @@
   <!-- Header -->
   <header class="bg-green-700 text-white p-4 shadow-lg">
     <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <h1 class="text-xl font-bold">🌿 Ayurtrace</h1>
+      <h1 class="text-xl font-bold">🌿 Ayur Trace</h1>
       <button onclick="openScanner()" class="bg-white text-green-700 px-4 py-2 rounded-lg shadow hover:bg-green-100">📷 Scan QR</button>
     </div>
   </header>
@@ -29,8 +33,6 @@
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/243ce0f2-49cc-44c0-820b-af70d4946e05.png" class="w-full h-full object-cover rounded-xl"></div>
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/23a582fe-c610-43cc-8621-5704e51302a3.png" class="w-full h-full object-cover rounded-xl"></div>
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/63a68b16-cd7a-4eb2-836a-28f47fc63864.png" class="w-full h-full object-cover rounded-xl"></div>
-        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/2bde6c08-187d-44f7-9574-f60739d72fa1.png" class="w-full h-full object-cover rounded-xl"></div>
-        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/c956bd7d-1df9-410d-ad78-88ab2bf25955.png" class="w-full h-full object-cover rounded-xl"></div>
       </div>
       <div class="swiper-pagination"></div>
     </div>
@@ -41,7 +43,7 @@
     <div>
       <h2 class="text-3xl font-bold text-green-700 mb-4">🌿 About Us</h2>
       <p class="text-gray-700 mb-4 leading-relaxed">
-        At <strong>Ayurtrace</strong>,we are dedicated to ensuring complete traceability of herbal products, right from farm to consumer. As part of the Smart India Hackathon (SIH) initiative, our goal is to provide transparency, quality assurance, and trust in every product you purchase. By combining traditional knowledge of Ayurveda with modern technology, we make sure every herbal product is authentic, safe, and effective.Our platform allows customers to track the journey of each batch using a unique QR code, providing detailed insights into the cultivation, harvesting, processing, and delivery of the herbs.
+        At <strong>Ayur Trace</strong>, we provide complete traceability of herbal products, right from farm to consumer.
       </p>
       <h3 class="text-xl font-semibold text-green-700 mb-2">Our Tracking Journey</h3>
       <ul class="list-disc list-inside text-gray-700 space-y-2">
@@ -56,6 +58,7 @@
       <img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/fc389ca2-27fb-44cc-a198-39b6a0ea9f03.png" alt="Herbal Farming" class="w-full object-cover rounded-xl shadow-md">
     </div>
   </section>
+
 </div>
 
 <!-- Scanner Modal -->
@@ -64,15 +67,6 @@
     <h3 class="text-lg font-semibold text-green-700 mb-3">📡 Scanning...</h3>
     <div id="reader" class="rounded-lg bg-gray-100 p-3" style="min-height: 400px;"></div>
     <button onclick="closeScanner()" class="absolute top-2 right-2 px-3 py-1 bg-red-600 text-white rounded-full shadow">✖</button>
-  </div>
-</div>
-
-<!-- Scan Result Modal -->
-<div id="resultModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
-    <h3 class="text-xl font-semibold text-green-700 mb-4">📄 Scan Report</h3>
-    <div id="resultContent" class="space-y-3"></div>
-    <button onclick="closeResult()" class="absolute top-2 right-2 px-3 py-1 bg-red-600 text-white rounded-full shadow">✖</button>
   </div>
 </div>
 
@@ -96,12 +90,19 @@
 <script>
 let scanner;
 
+// Scanner functions
 function openScanner() {
   document.getElementById("scannerModal").classList.remove("hidden");
   document.getElementById("pageContent").classList.add("filter", "blur-sm");
   scanner = new Html5Qrcode("reader");
   scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
-    (decodedText) => { showResult(decodedText); closeScanner(); });
+    (decodedText) => {
+      // decodedText is full URL from QR, e.g. https://ai-herb-tracker.onrender.com/batch/BATCH-001
+      const parts = decodedText.split('/');
+      const batchId = parts[parts.length - 1]; // Get BATCH-001
+      window.location.href = `batch.html?batchId=${batchId}`;
+      closeScanner();
+    });
 }
 
 function closeScanner() {
@@ -113,49 +114,11 @@ function closeScanner() {
   }
 }
 
-function showResult(text) {
-  const resultContent = document.getElementById("resultContent");
-  resultContent.innerHTML = "";
-  try {
-    const data = JSON.parse(text);
-    for (let key in data) {
-      const card = document.createElement("div");
-      card.className = "p-3 border-l-4 border-green-500 bg-green-50 rounded shadow-sm";
-      const title = document.createElement("p");
-      title.className = "font-semibold text-green-700";
-      title.textContent = key;
-      const value = document.createElement("p");
-      value.className = "text-gray-700";
-      value.textContent = data[key];
-      card.appendChild(title);
-      card.appendChild(value);
-      resultContent.appendChild(card);
-    }
-  } catch {
-    const card = document.createElement("div");
-    card.className = "p-3 border-l-4 border-green-500 bg-green-50 rounded shadow-sm";
-    card.textContent = text;
-    resultContent.appendChild(card);
-  }
-  document.getElementById("resultModal").classList.remove("hidden");
-  document.getElementById("pageContent").classList.add("filter", "blur-sm");
-}
-
-function closeResult() {
-  document.getElementById("resultModal").classList.add("hidden");
-  document.getElementById("pageContent").classList.remove("filter", "blur-sm");
-}
-
+// Chatbot functions
 function toggleChatbot() {
   document.getElementById("chatbot").classList.toggle("hidden");
 }
 
-// Swiper
-window.addEventListener("load", () => {
-  new Swiper(".generalSwiper", { loop: true, pagination: { el: ".swiper-pagination" }, autoplay: { delay: 2500 }});
-});
-
-// Chatbot
 async function getBotReply(msg) {
   try {
     const res = await fetch("/chat", {
@@ -198,6 +161,12 @@ async function sendMessage() {
 
 sendBtn.addEventListener("click", sendMessage);
 chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } });
+
+// Swiper carousel
+window.addEventListener("load", () => {
+  new Swiper(".generalSwiper", { loop: true, pagination: { el: ".swiper-pagination" }, autoplay: { delay: 2500 } });
+});
 </script>
+
 </body>
 </html>
