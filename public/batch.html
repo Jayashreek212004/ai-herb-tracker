@@ -58,16 +58,29 @@ async function fetchBatchDetails() {
   container.innerHTML = "";
 
   try {
-    const res = await fetch(`https://ai-herb-tracker.onrender.com/api/batch/${batchId}`);
+    // ✅ Correct backend URL
+    const res = await fetch(`https://herb-backend-kaiu.onrender.com/api/batch/${batchId}`);
     if (!res.ok) throw new Error("Failed to fetch batch details");
     const data = await res.json();
 
     // Display batch data
-    renderSection(container, "Batch ID", data.batchId || "N/A");
-    renderSection(container, "Farm Name", data.farmName || "N/A");
-    renderSection(container, "Harvest Date", data.harvestDate || "N/A");
-    renderSection(container, "Processing Details", data.processing || "N/A");
-    renderSection(container, "Delivery Status", data.delivery || "N/A");
+    renderSection(container, "Batch ID", data.batch.batchId || "N/A");
+    renderSection(container, "Farmer Name", data.batch.farmer.name || "N/A");
+    renderSection(container, "Harvest Date", data.batch.createdAt || "N/A");
+    renderSection(container, "Species", data.batch.species || "N/A");
+    renderSection(container, "Part Used", data.batch.partUsed || "N/A");
+    renderSection(container, "Quantity", data.batch.quantity || "N/A");
+    renderSection(container, "Status", data.batch.status || "N/A");
+
+    // Optional: Processor Records
+    if (data.processorRecords && data.processorRecords.length > 0) {
+      data.processorRecords.forEach((record, index) => {
+        renderSection(container, `Processor Record ${index+1} - Product Name`, record.productName || "N/A");
+        renderSection(container, `Processor Record ${index+1} - Quantity Processed`, record.quantityProcessed || "N/A");
+        renderSection(container, `Processor Record ${index+1} - Drying Method`, record.dryingMethod || "N/A");
+        renderSection(container, `Processor Record ${index+1} - Extraction Method`, record.extractionMethod || "N/A");
+      });
+    }
 
   } catch (err) {
     const error = document.createElement("p");
