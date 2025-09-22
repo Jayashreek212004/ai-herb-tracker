@@ -1,0 +1,14 @@
+{
+  "BATCH-001": {
+    "farmer": { "name": "Ramesh", "location": "Kerala" },
+    "agent": { "name": "Anil", "contact": "9876543210" },
+    "processor": { "company": "HerbalCare Ltd", "location": "Bangalore" },
+    "manufacturer": { "company": "Ayur Trace Pharma", "location": "Mumbai" }
+  },
+  "BATCH-002": {
+    "farmer": { "name": "Sita", "location": "Tamil Nadu" },
+    "agent": { "name": "Vikram", "contact": "9876543211" },
+    "processor": { "company": "GreenHerbs", "location": "Hyderabad" },
+    "manufacturer": { "company": "Ayur Life Sciences", "location": "Delhi" }
+  }
+}

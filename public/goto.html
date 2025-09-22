@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redirecting...</title>
+<script>
+  // Get batchId from QR URL
+  const params = new URLSearchParams(window.location.search);
+  const batchId = params.get("batchId");
+
+  if (batchId) {
+    // Redirect to batch.html with the batchId
+    window.location.href = `batch.html?batchId=${batchId}`;
+  } else {
+    document.body.innerHTML = "<p>⚠ Invalid QR code</p>";
+  }
+</script>
+</head>
+<body>
+Redirecting...
+</body>
+</html>

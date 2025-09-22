@@ -25,7 +25,7 @@
     </div>
   </header>
 
-  <!-- Carousel -->
+  <!-- Carousel (unchanged) -->
   <div class="max-w-6xl mx-auto mt-5">
     <div class="swiper generalSwiper rounded-xl shadow-lg h-48 sm:h-64 md:h-80 lg:h-96">
       <div class="swiper-wrapper">
@@ -33,26 +33,20 @@
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/243ce0f2-49cc-44c0-820b-af70d4946e05.png" class="w-full h-full object-cover rounded-xl"></div>
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/23a582fe-c610-43cc-8621-5704e51302a3.png" class="w-full h-full object-cover rounded-xl"></div>
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/63a68b16-cd7a-4eb2-836a-28f47fc63864.png" class="w-full h-full object-cover rounded-xl"></div>
+        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/IMAGE5.png" class="w-full h-full object-cover rounded-xl"></div>
+        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/IMAGE6.png" class="w-full h-full object-cover rounded-xl"></div>
       </div>
       <div class="swiper-pagination"></div>
     </div>
   </div>
 
-  <!-- About Section -->
+  <!-- About Section (unchanged) -->
   <section class="max-w-6xl mx-auto mt-10 bg-white rounded-xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
     <div>
       <h2 class="text-3xl font-bold text-green-700 mb-4">🌿 About Us</h2>
       <p class="text-gray-700 mb-4 leading-relaxed">
-        At <strong>Ayur Trace</strong>, we provide complete traceability of herbal products, right from farm to consumer.
+        At <strong>Ayur Trace</strong>, we provide complete traceability of herbal products, from farm to consumer, ensuring transparency, quality, and authenticity at every step. Our platform allows customers to track the entire journey of each herbal product, including cultivation, processing, packaging, and delivery. By connecting farmers, processors, distributors, and consumers, <strong>Ayur Trace</strong> promotes trust, safety, and sustainability in the herbal industry.
       </p>
-      <h3 class="text-xl font-semibold text-green-700 mb-2">Our Tracking Journey</h3>
-      <ul class="list-disc list-inside text-gray-700 space-y-2">
-        <li><strong>🌱 Cultivation:</strong> Herbs grown on certified organic farms.</li>
-        <li><strong>📝 Harvesting:</strong> Each batch inspected for quality.</li>
-        <li><strong>🏭 Processing:</strong> Herbs processed safely.</li>
-        <li><strong>🔍 Traceability:</strong> Unique QR for each batch.</li>
-        <li><strong>📦 Delivery:</strong> Scan QR to see journey.</li>
-      </ul>
     </div>
     <div>
       <img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/fc389ca2-27fb-44cc-a198-39b6a0ea9f03.png" alt="Herbal Farming" class="w-full object-cover rounded-xl shadow-md">
@@ -70,7 +64,7 @@
   </div>
 </div>
 
-<!-- Chatbot -->
+<!-- Chatbot (unchanged) -->
 <div id="chatbot" class="fixed bottom-5 right-5 w-80 bg-white rounded-xl shadow-lg border border-gray-200 hidden z-40">
   <div class="bg-green-700 text-white p-3 rounded-t-xl flex justify-between items-center">
     <span>💬 Herbal Assistant</span>
@@ -84,23 +78,21 @@
     <button id="sendBtn" class="bg-green-700 text-white px-3 rounded-r-lg">Send</button>
   </div>
 </div>
-
 <button onclick="toggleChatbot()" class="fixed bottom-5 right-5 bg-green-700 text-white p-4 rounded-full shadow-lg z-30">💬</button>
 
 <script>
 let scanner;
+const WEBSITE_URL = window.location.origin; // Automatically works on deployed domain
 
-// Scanner functions
 function openScanner() {
   document.getElementById("scannerModal").classList.remove("hidden");
   document.getElementById("pageContent").classList.add("filter", "blur-sm");
   scanner = new Html5Qrcode("reader");
+
   scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
     (decodedText) => {
-      // decodedText is full URL from QR, e.g. https://ai-herb-tracker.onrender.com/batch/BATCH-001
-      const parts = decodedText.split('/');
-      const batchId = parts[parts.length - 1]; // Get BATCH-001
-      window.location.href = `batch.html?batchId=${batchId}`;
+      const batchId = decodedText.trim();
+      window.location.href = `${WEBSITE_URL}/batch.html?batchId=${batchId}`;
       closeScanner();
     });
 }
@@ -114,26 +106,8 @@ function closeScanner() {
   }
 }
 
-// Chatbot functions
-function toggleChatbot() {
-  document.getElementById("chatbot").classList.toggle("hidden");
-}
-
-async function getBotReply(msg) {
-  try {
-    const res = await fetch("/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg })
-    });
-    if (!res.ok) return "⚠ Error from server.";
-    const data = await res.json();
-    return data.reply || "⚠ No reply from server.";
-  } catch {
-    return "⚠ Could not connect to chatbot server.";
-  }
-}
-
+// Chatbot
+function toggleChatbot() { document.getElementById("chatbot").classList.toggle("hidden"); }
 const chatInput = document.getElementById("chatInput");
 const chatBox = document.getElementById("chatBox");
 const sendBtn = document.getElementById("sendBtn");
@@ -154,17 +128,21 @@ async function sendMessage() {
   chatBox.appendChild(botMsg);
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  const reply = await getBotReply(msg);
-  botMsg.textContent = "Bot: " + reply;
-  chatBox.scrollTop = chatBox.scrollHeight;
+  try {
+    const res = await fetch("/chat", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({message: msg}) });
+    const data = await res.json();
+    botMsg.textContent = "Bot: " + (data.reply || "⚠ No reply from server.");
+    chatBox.scrollTop = chatBox.scrollHeight;
+  } catch {
+    botMsg.textContent = "Bot: ⚠ Could not connect to server.";
+  }
 }
 
 sendBtn.addEventListener("click", sendMessage);
-chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } });
+chatInput.addEventListener("keypress", (e)=>{ if(e.key==="Enter"){e.preventDefault(); sendMessage();} });
 
-// Swiper carousel
 window.addEventListener("load", () => {
-  new Swiper(".generalSwiper", { loop: true, pagination: { el: ".swiper-pagination" }, autoplay: { delay: 2500 } });
+  new Swiper(".generalSwiper", { loop:true, pagination:{el:".swiper-pagination"}, autoplay:{delay:2500} });
 });
 </script>
 
