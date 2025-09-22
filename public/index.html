@@ -25,7 +25,7 @@
     </div>
   </header>
 
-  <!-- Carousel (unchanged) -->
+  <!-- Carousel with 6 images -->
   <div class="max-w-6xl mx-auto mt-5">
     <div class="swiper generalSwiper rounded-xl shadow-lg h-48 sm:h-64 md:h-80 lg:h-96">
       <div class="swiper-wrapper">
@@ -33,20 +33,29 @@
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/243ce0f2-49cc-44c0-820b-af70d4946e05.png" class="w-full h-full object-cover rounded-xl"></div>
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/23a582fe-c610-43cc-8621-5704e51302a3.png" class="w-full h-full object-cover rounded-xl"></div>
         <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/63a68b16-cd7a-4eb2-836a-28f47fc63864.png" class="w-full h-full object-cover rounded-xl"></div>
-        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/IMAGE5.png" class="w-full h-full object-cover rounded-xl"></div>
-        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/IMAGE6.png" class="w-full h-full object-cover rounded-xl"></div>
+        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/2bde6c08-187d-44f7-9574-f60739d72fa1.png" class="w-full h-full object-cover rounded-xl"></div>
+        <div class="swiper-slide"><img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/c956bd7d-1df9-410d-ad78-88ab2bf25955.png" class="w-full h-full object-cover rounded-xl"></div>
       </div>
       <div class="swiper-pagination"></div>
     </div>
   </div>
 
-  <!-- About Section (unchanged) -->
+  <!-- About Section with full details -->
   <section class="max-w-6xl mx-auto mt-10 bg-white rounded-xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
     <div>
       <h2 class="text-3xl font-bold text-green-700 mb-4">🌿 About Us</h2>
       <p class="text-gray-700 mb-4 leading-relaxed">
-        At <strong>Ayur Trace</strong>, we provide complete traceability of herbal products, from farm to consumer, ensuring transparency, quality, and authenticity at every step. Our platform allows customers to track the entire journey of each herbal product, including cultivation, processing, packaging, and delivery. By connecting farmers, processors, distributors, and consumers, <strong>Ayur Trace</strong> promotes trust, safety, and sustainability in the herbal industry.
+        At <strong>Ayur Trace</strong>, we provide complete traceability of herbal products, from farm to consumer, ensuring transparency, quality, and authenticity at every step. Our platform allows customers to track the entire journey of each herbal product, including cultivation, processing, packaging, and delivery. By connecting farmers, processors, distributors, and consumers, <strong>Ayur Trace</strong> promotes trust, safety, and sustainability in the herbal industry. Customers can view detailed information about every batch, including farmer details, processing units, agents, and manufacturers, guaranteeing the authenticity of each herbal product.
       </p>
+      <h3 class="text-xl font-semibold text-green-700 mb-2">Our Tracking Journey</h3>
+      <ul class="list-disc list-inside text-gray-700 space-y-2">
+        <li><strong>🌱 Cultivation:</strong> Herbs grown on certified organic farms.</li>
+        <li><strong>📝 Harvesting:</strong> Each batch inspected for quality.</li>
+        <li><strong>🏭 Processing:</strong> Herbs processed safely.</li>
+        <li><strong>🔍 Traceability:</strong> Unique QR for each batch.</li>
+        <li><strong>📦 Delivery:</strong> Scan QR to see journey.</li>
+      </ul>
+
     </div>
     <div>
       <img src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/fc389ca2-27fb-44cc-a198-39b6a0ea9f03.png" alt="Herbal Farming" class="w-full object-cover rounded-xl shadow-md">
@@ -64,7 +73,7 @@
   </div>
 </div>
 
-<!-- Chatbot (unchanged) -->
+<!-- Chatbot -->
 <div id="chatbot" class="fixed bottom-5 right-5 w-80 bg-white rounded-xl shadow-lg border border-gray-200 hidden z-40">
   <div class="bg-green-700 text-white p-3 rounded-t-xl flex justify-between items-center">
     <span>💬 Herbal Assistant</span>
@@ -82,19 +91,29 @@
 
 <script>
 let scanner;
-const WEBSITE_URL = window.location.origin; // Automatically works on deployed domain
 
 function openScanner() {
   document.getElementById("scannerModal").classList.remove("hidden");
   document.getElementById("pageContent").classList.add("filter", "blur-sm");
   scanner = new Html5Qrcode("reader");
 
-  scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
     (decodedText) => {
-      const batchId = decodedText.trim();
-      window.location.href = `${WEBSITE_URL}/batch.html?batchId=${batchId}`;
+      if (decodedText.startsWith("http")) {
+        window.location.href = decodedText;
+      } else {
+        const batchId = decodedText.trim();
+        window.location.href = `batch.html?batchId=${batchId}`;
+      }
       closeScanner();
-    });
+    },
+    (err) => { console.warn("QR Scan error:", err); }
+  ).catch(err => {
+    alert("Camera error: " + err);
+    closeScanner();
+  });
 }
 
 function closeScanner() {
@@ -129,7 +148,11 @@ async function sendMessage() {
   chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
-    const res = await fetch("/chat", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({message: msg}) });
+    const res = await fetch("/chat", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message: msg})
+    });
     const data = await res.json();
     botMsg.textContent = "Bot: " + (data.reply || "⚠ No reply from server.");
     chatBox.scrollTop = chatBox.scrollHeight;

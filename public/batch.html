@@ -29,43 +29,52 @@
 
 <script>
 async function fetchBatchDetails() {
+  // Read batchId from query string → e.g. batch.html?batchId=BATCH-001
   const params = new URLSearchParams(window.location.search);
   const batchId = params.get("batchId");
   const container = document.getElementById("batchContent");
   container.innerHTML = "";
 
-  if(!batchId){
-    container.innerHTML = `<p class="text-red-600">⚠ Invalid QR code</p>`;
+  if (!batchId) {
+    container.innerHTML = `<p class="text-red-600">⚠ Invalid QR code (batchId missing)</p>`;
     return;
   }
 
   try {
     const res = await fetch("data/batches.json");
-    if(!res.ok) throw new Error("Failed to fetch batches.json");
+    if (!res.ok) throw new Error("Failed to fetch batches.json");
+
     const data = await res.json();
     const batch = data[batchId];
-    if(!batch){
+
+    if (!batch) {
       container.innerHTML = `<p class="text-red-600">⚠ No details found for ${batchId}</p>`;
       return;
     }
 
+    // Prepare sections for display
     const sections = [
       ["Batch ID", batchId],
+      ["Herb Name", batch.herb_name],
       ["Farmer Name", batch.farmer.name],
       ["Farmer Location", batch.farmer.location],
-      ["Agent", batch.agent.name + ", " + batch.agent.contact],
+      ["Harvest Date", batch.harvest_date],
+      ["Lab Test", batch.lab_test],
+      ["Agent", batch.agent.name + " (" + batch.agent.contact + ")"],
       ["Processor", batch.processor.company + ", " + batch.processor.location],
-      ["Manufacturer", batch.manufacturer.company + ", " + batch.manufacturer.location]
+      ["Manufacturer", batch.manufacturer.company + ", " + batch.manufacturer.location],
+      ["Status", batch.status]
     ];
 
-    sections.forEach(([title, value])=>{
+    // Render each section as card
+    sections.forEach(([title, value]) => {
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `<h3 class="font-semibold mb-2 text-green-700">${title}</h3><p>${value}</p>`;
       container.appendChild(card);
     });
 
-  } catch(err){
+  } catch (err) {
     container.innerHTML = `<p class="text-red-600">⚠ Could not fetch batch details: ${err.message}</p>`;
   }
 }
